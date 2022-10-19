@@ -20,3 +20,5 @@ Rails.application.configure do
     config.logger = ActiveSupport::TaggedLogging.new(logger)
   end
 end
+
+# SELECT "good_jobs".* FROM "good_jobs" WHERE "good_jobs"."id" IN (WITH "rows" AS MATERIALIZED ( SELECT "good_jobs"."id", "good_jobs"."active_job_id" FROM "good_jobs" WHERE "good_jobs"."finished_at" IS NULL AND ("good_jobs"."scheduled_at" <= '2022-10-19 19:42:25.550285' OR "good_jobs"."scheduled_at" IS NULL) ORDER BY priority DESC NULLS LAST, created_at ASC ) SELECT "rows"."id" FROM "rows" WHERE pg_try_advisory_lock(('x' || substr(md5('good_jobs' || '-' || "rows"."active_job_id"::text), 1, 16))::bit(64)::bigint) LIMIT $1) ORDER BY priority DESC NULLS LAST, created_at ASC  [["LIMIT", 1]]
