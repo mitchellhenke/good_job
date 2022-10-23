@@ -17,23 +17,31 @@ when 'development'
   GoodJob.on_thread_error = -> (error) { Rails.logger.warn("#{error}\n#{error.backtrace}") }
 
   Rails.application.configure do
-    config.good_job.enable_cron = ActiveModel::Type::Boolean.new.cast(ENV.fetch('GOOD_JOB_ENABLE_CRON', true))
+    config.good_job.enable_cron = true
+    config.good_job.max_threads = 100
+    config.good_job.queues = '*'
+    config.good_job.retry_on_unhandled_error = false
     config.good_job.cron = {
-      frequent_example: {
-        description: "Enqueue an ExampleJob",
-        cron: "*/5 * * * * *",
-        class: "ExampleJob",
-        args: (lambda do
-          [ExampleJob::TYPES.sample.to_s]
-        end),
-        set: (lambda do
-          queue = [:default, :elephants, :mice].sample
-          delay = [0, (0..60).to_a.sample].sample
-          priority = [-10, 0, 10].sample
-
-          { wait: delay, queue: queue, priority: priority }
-        end),
+      minute_job: {
+        cron: '* * * * *',
+        class: 'MinuteJob',
+        args: -> { [Time.zone.now] },
       },
+      # frequent_example: {
+      #   description: "Enqueue an ExampleJob",
+      #   cron: "*/5 * * * * *",
+      #   class: "ExampleJob",
+      #   args: (lambda do
+      #     [ExampleJob::TYPES.sample.to_s]
+      #   end),
+      #   set: (lambda do
+      #     queue = [:default, :elephants, :mice].sample
+      #     delay = [0, (0..60).to_a.sample].sample
+      #     priority = [-10, 0, 10].sample
+
+      #     { wait: delay, queue: queue, priority: priority }
+      #   end),
+      # },
     }
   end
 when 'test'
