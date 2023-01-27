@@ -66,9 +66,6 @@ module GoodJob
       else
         job_state = { queue_name: execution.queue_name }
         job_state[:scheduled_at] = execution.scheduled_at if execution.scheduled_at
-
-        executed_locally = execute_async? && @scheduler&.create_thread(job_state)
-        Notifier.notify(job_state) unless executed_locally
       end
 
       execution
